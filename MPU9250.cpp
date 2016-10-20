@@ -1,35 +1,39 @@
 /*
-MPU9250.cpp
-Brian R Taylor
-brian.taylor@bolderflight.com
-2016-10-10
+   MPU9250.cpp : Implementation code for Raspberry Pi MPU9250 library
 
-Copyright (c) 2016 Bolder Flight Systems
+   Modified by Simon D. Levy from :
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-and associated documentation files (the "Software"), to deal in the Software without restriction, 
-including without limitation the rights to use, copy, modify, merge, publish, distribute, 
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
-furnished to do so, subject to the following conditions:
+   MPU9250.cpp
+   Brian R Taylor
+   brian.taylor@bolderflight.com
+   2016-10-10
 
-The above copyright notice and this permission notice shall be included in all copies or 
-substantial portions of the Software.
+   Copyright (c) 2016 Bolder Flight Systems
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+   and associated documentation files (the "Software"), to deal in the Software without restriction, 
+   including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+   sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+   furnished to do so, subject to the following conditions:
 
-// Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC 
-#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || \
-	defined(__MK66FX1M0__) || defined(__MKL26Z64__)
+   The above copyright notice and this permission notice shall be included in all copies or 
+   substantial portions of the Software.
 
-#include "Arduino.h"
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+   BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include "MPU9250.h"
-#include "i2c_t3.h"  // I2C library
-#include "SPI.h" // SPI Library
+
+// XXX
+#define I2C_PULLUPS_INT 0
+#define I2C_PULLUPS_EXT 0
+#define I2C_PINS_18_19 0
+#define HIGH 0
+#define LOW 0
 
 /* MPU9250 object, input the I2C address and I2C bus */
 MPU9250::MPU9250(uint8_t address, uint8_t bus){
@@ -74,13 +78,13 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     if( _useSPI ){ // using SPI for communication
 
         // setting CS pin to output
-        pinMode(_csPin,OUTPUT);
+        //pinMode(_csPin,OUTPUT);
 
         // setting CS pin high
-        digitalWriteFast(_csPin,HIGH);
+        //digitalWriteFast(_csPin,HIGH);
 
         // begin the SPI
-        SPI.begin();
+        //SPI.begin();
     }
     else{ // using I2C for communication
 
@@ -88,71 +92,16 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
             /* setting the I2C pins, pullups, and protecting against _bus out of range */
             _pullups = I2C_PULLUP_EXT; // default to external pullups
 
-            #if defined(__MK20DX128__) // Teensy 3.0
-                _pins = I2C_PINS_18_19;
-                _bus = 0;
-            #endif
-
-            #if defined(__MK20DX256__) // Teensy 3.1/3.2
-                if(_bus == 1) {
-                    _pins = I2C_PINS_29_30;
-                }
-                else{
-                    _pins = I2C_PINS_18_19;
-                    _bus = 0;
-                }
-
-            #endif
-
-            #if defined(__MK64FX512__) // Teensy 3.5
-                if(_bus == 2) {
-                    _pins = I2C_PINS_3_4;
-                }
-                else if(_bus == 1) {
-                    _pins = I2C_PINS_37_38;
-                }
-                else{
-                    _pins = I2C_PINS_18_19;
-                    _bus = 0;
-                }
-
-            #endif
-
-            #if defined(__MK66FX1M0__) // Teensy 3.6
-                if(_bus == 3) {
-                    _pins = I2C_PINS_56_57;
-                }
-                else if(_bus == 2) {
-                    _pins = I2C_PINS_3_4;
-                }
-                else if(_bus == 1) {
-                    _pins = I2C_PINS_37_38;
-                }
-                else{
-                    _pins = I2C_PINS_18_19;
-                    _bus = 0;
-                }
-
-            #endif
-
-            #if defined(__MKL26Z64__) // Teensy LC
-                if(_bus == 1) {
-                    _pins = I2C_PINS_22_23;
-                }
-                else{
-                    _pins = I2C_PINS_18_19;
-                    _bus = 0;
-                }
-
-            #endif
+            _pins = I2C_PINS_18_19;
+            _bus = 0;
         }
 
         // starting the I2C bus
-        i2c_t3(_bus).begin(I2C_MASTER, 0, _pins, _pullups, _i2cRate);
+        //i2c_t3(_bus).begin(I2C_MASTER, 0, _pins, _pullups, _i2cRate);
     }
 
 	// reset the MPU9250
-	writeRegister(PWR_MGMNT_1,PWR_RESET);
+	//writeRegister(PWR_MGMNT_1,PWR_RESET);
 
     // wait for oscillators to stabilize
     delay(200);
@@ -693,6 +642,7 @@ void MPU9250::getMotion10(float* ax, float* ay, float* az, float* gx, float* gy,
 bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
     uint8_t buff[1];
 
+#ifdef FOO
     /* write data to device */
     if( _useSPI ){
         SPI.beginTransaction(SPISettings(SPI_LS_CLOCK, MSBFIRST, SPI_MODE3)); // begin the transaction
@@ -712,7 +662,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 
   	/* read back the register */
   	readRegisters(subAddress,sizeof(buff),&buff[0]);
-
+#endif
   	/* check the read back register against the written register */
   	if(buff[0] == data) {
   		return true;
@@ -725,6 +675,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 /* reads registers from MPU9250 given a starting register address, number of bytes, and a pointer to store data */
 void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
+    /*
     if( _useSPI ){
         // begin the transaction
         if(_useSPIHS){
@@ -756,6 +707,7 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
             dest[i++] = i2c_t3(_bus).readByte();
         }
     }
+    */
 }
 
 /* writes a register to the AK8963 given a register address and data */
@@ -810,5 +762,3 @@ uint8_t MPU9250::whoAmIAK8963(){
     // return the register value
     return buff[0];
 }
-
-#endif
