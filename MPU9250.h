@@ -59,8 +59,8 @@ enum mpu9250_dlpf_bandwidth
 
 class MPU9250{
     public:
-        MPU9250(uint8_t address, uint8_t bus);
-        MPU9250(uint8_t csPin);
+        MPU9250(uint8_t i2c_address);
+        MPU9250(void); // SPI
         int begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange);
         int setFilt(mpu9250_dlpf_bandwidth bandwidth, uint8_t SRD);
         void getAccel(float* ax, float* ay, float* az);
@@ -81,8 +81,8 @@ class MPU9250{
         void getMotion9Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* hx, int16_t* hy, int16_t* hz);
         void getMotion10Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* hx, int16_t* hy, int16_t* hz, int16_t* t);
     private:
-        uint8_t _address;
-        uint8_t _bus;
+        uint8_t _i2c_address;
+        int8_t _i2c_fd;
         bool _userDefI2C;
         uint8_t _csPin;
         bool _useSPI;

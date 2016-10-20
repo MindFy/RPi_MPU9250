@@ -31,16 +31,14 @@
 #include <wiringPiI2C.h>
 
 /* MPU9250 object, input the I2C address and I2C bus */
-MPU9250::MPU9250(uint8_t address, uint8_t bus){
-    _address = address; // I2C address
-    _bus = bus; // I2C bus
+MPU9250::MPU9250(uint8_t i2c_address){
+    _i2c_address = i2c_address; // I2C address
     _userDefI2C = false; // automatic I2C setup
     _useSPI = false; // set to use I2C instead of SPI
 }
 
 /* MPU9250 object, input the SPI CS Pin */
-MPU9250::MPU9250(uint8_t csPin){
-    _csPin = csPin; // SPI CS Pin
+MPU9250::MPU9250(void){
     _useSPI = true; // set to use SPI instead of I2C
     _useSPIHS = false; // defaul to low speed SPI transactions until data reads start to occur
 }
@@ -52,24 +50,16 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
 
     if( _useSPI ){ // using SPI for communication
 
-        // setting CS pin to output
-        pinMode(_csPin,OUTPUT);
-
-        // setting CS pin high
-        digitalWrite(_csPin,HIGH);
-
         // begin the SPI
         //SPI.begin();
     }
     else{ // using I2C for communication
 
-        if( !_userDefI2C ) { // setup the I2C pins and pullups based on bus number if not defined by user
-            /* setting the I2C pins, pullups, and protecting against _bus out of range */
-            _bus = 0;
-        }
-
         // starting the I2C bus
-        int wiringPiI2CSetup (_address) ;
+        _i2c_fd = wiringPiI2CSetup (_i2c_address);
+
+        if (_i2c_fd < 0)
+            return -1;
     }
 
 	// reset the MPU9250
@@ -626,7 +616,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
         */
     }
     else{
-        wiringPiI2CWrite (subAddress, data);
+        wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
     }
     delay(10); // need to slow down how fast I write to MPU9250
 
@@ -634,12 +624,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
   	readRegisters(subAddress,sizeof(buff),&buff[0]);
 
   	/* check the read back register against the written register */
-  	if(buff[0] == data) {
-  		return true;
-  	}
-  	else{
-  		return false;
-  	}
+    return buff[0] == data;
 }
 
 /* reads registers from MPU9250 given a starting register address, number of bytes, and a pointer to store data */
@@ -670,7 +655,7 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
         uint8_t i = 0; // read the data into the buffer
         for (uint8_t i=0; i<count; ++i) {
-            dest[i] = wiringPiI2CRead(subAddress+i);
+            dest[i] = wiringPiI2CReadReg8(_i2c_fd, subAddress+i);
         }
     }
 }
