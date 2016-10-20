@@ -3,8 +3,8 @@
 #include <wiringPi.h>
 
 
-// an MPU9250 object with the MPU-9250 sensor on Teensy Chip Select pin 10
-MPU9250 IMU();
+// an MPU9250 object with the MPU-9250 sensor using SPI
+MPU9250 IMU;
 
 float ax, ay, az, gx, gy, gz, hx, hy, hz, t;
 int beginStatus;
