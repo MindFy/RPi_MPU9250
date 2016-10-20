@@ -73,7 +73,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     }
 
 	// reset the MPU9250
-	//writeRegister(PWR_MGMNT_1,PWR_RESET);
+	writeRegister(PWR_MGMNT_1,PWR_RESET);
 
     // wait for oscillators to stabilize
     delay(200);
