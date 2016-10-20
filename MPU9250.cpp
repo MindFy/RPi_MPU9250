@@ -28,6 +28,7 @@
 
 #include "MPU9250.h"
 #include <wiringPi.h>
+#include <wiringPiI2C.h>
 
 /* MPU9250 object, input the I2C address and I2C bus */
 MPU9250::MPU9250(uint8_t address, uint8_t bus){
@@ -52,10 +53,10 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     if( _useSPI ){ // using SPI for communication
 
         // setting CS pin to output
-        //pinMode(_csPin,OUTPUT);
+        pinMode(_csPin,OUTPUT);
 
         // setting CS pin high
-        //digitalWriteFast(_csPin,HIGH);
+        digitalWrite(_csPin,HIGH);
 
         // begin the SPI
         //SPI.begin();
@@ -68,7 +69,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
         }
 
         // starting the I2C bus
-        //i2c_t3(_bus).begin(I2C_MASTER, 0, _pins, _pullups, _i2cRate);
+        int wiringPiI2CSetup (_address) ;
     }
 
 	// reset the MPU9250
@@ -613,27 +614,25 @@ void MPU9250::getMotion10(float* ax, float* ay, float* az, float* gx, float* gy,
 bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
     uint8_t buff[1];
 
-#ifdef FOO
     /* write data to device */
     if( _useSPI ){
+        /*
         SPI.beginTransaction(SPISettings(SPI_LS_CLOCK, MSBFIRST, SPI_MODE3)); // begin the transaction
         digitalWriteFast(_csPin,LOW); // select the MPU9250 chip
         SPI.transfer(subAddress); // write the register address
         SPI.transfer(data); // write the data
         digitalWriteFast(_csPin,HIGH); // deselect the MPU9250 chip
         SPI.endTransaction(); // end the transaction
+        */
     }
     else{
-      	i2c_t3(_bus).beginTransmission(_address); // open the device
-      	i2c_t3(_bus).write(subAddress); // write the register address
-      	i2c_t3(_bus).write(data); // write the data
-      	i2c_t3(_bus).endTransmission();
+        wiringPiI2CWrite (subAddress, data);
     }
     delay(10); // need to slow down how fast I write to MPU9250
 
   	/* read back the register */
   	readRegisters(subAddress,sizeof(buff),&buff[0]);
-#endif
+
   	/* check the read back register against the written register */
   	if(buff[0] == data) {
   		return true;
@@ -646,8 +645,8 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 /* reads registers from MPU9250 given a starting register address, number of bytes, and a pointer to store data */
 void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
-    /*
     if( _useSPI ){
+        /*
         // begin the transaction
         if(_useSPIHS){
             SPI.beginTransaction(SPISettings(SPI_HS_CLOCK, MSBFIRST, SPI_MODE3));
@@ -665,20 +664,15 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
         digitalWriteFast(_csPin,HIGH); // deselect the MPU9250 chip
         SPI.endTransaction(); // end the transaction
+        */
     }
     else{
-        i2c_t3(_bus).beginTransmission(_address); // open the device
-        i2c_t3(_bus).write(subAddress); // specify the starting register address
-        i2c_t3(_bus).endTransmission(false);
-
-        i2c_t3(_bus).requestFrom(_address, count); // specify the number of bytes to receive
 
         uint8_t i = 0; // read the data into the buffer
-        while( i2c_t3(_bus).available() ){
-            dest[i++] = i2c_t3(_bus).readByte();
+        for (uint8_t i=0; i<count; ++i) {
+            dest[i] = wiringPiI2CRead(subAddress+i);
         }
     }
-    */
 }
 
 /* writes a register to the AK8963 given a register address and data */
