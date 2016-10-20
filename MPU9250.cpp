@@ -617,13 +617,18 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 
     /* write data to device */
     if( _useSPI ){
-        if (wiringPiSPIDataRW (0, &data, 1) < 1)
+        uint8_t buff2[2];
+        buff2[0] = subAddress;
+        buff2[1] = data;
+        if (wiringPiSPIDataRW (0, &buff2[0], 2) < 2)
             return -1;
     }
     else{
         wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
     }
     delay(10); // need to slow down how fast I write to MPU9250
+
+    printf("OKAY\n");
 
   	/* read back the register */
   	readRegisters(subAddress,sizeof(buff),&buff[0]);
