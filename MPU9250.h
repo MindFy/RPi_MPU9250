@@ -60,8 +60,6 @@ enum mpu9250_dlpf_bandwidth
 class MPU9250{
     public:
         MPU9250(uint8_t address, uint8_t bus);
-        MPU9250(uint8_t address, uint8_t bus);
-        MPU9250(uint8_t address, uint8_t bus);
         MPU9250(uint8_t csPin);
         int begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange);
         int setFilt(mpu9250_dlpf_bandwidth bandwidth, uint8_t SRD);
