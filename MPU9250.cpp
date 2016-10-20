@@ -27,8 +27,12 @@
  */
 
 #include "MPU9250.h"
+
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <wiringPiSPI.h>
+
+#include <stdio.h>
 
 /* MPU9250 object, input the I2C address and I2C bus */
 MPU9250::MPU9250(uint8_t i2c_address){
@@ -40,7 +44,7 @@ MPU9250::MPU9250(uint8_t i2c_address){
 /* MPU9250 object, input the SPI CS Pin */
 MPU9250::MPU9250(void){
     _useSPI = true; // set to use SPI instead of I2C
-    _useSPIHS = false; // defaul to low speed SPI transactions until data reads start to occur
+    _useSPIHS = false; // default to low speed SPI transactions until data reads start to occur
 }
 
 /* starts I2C communication and sets up the MPU-9250 */
@@ -51,7 +55,8 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     if( _useSPI ){ // using SPI for communication
 
         // begin the SPI
-        //SPI.begin();
+        if (wiringPiSPISetup (0, 100000) < 0) 
+            return -1;
     }
     else{ // using I2C for communication
 
@@ -67,11 +72,17 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
 
     // wait for oscillators to stabilize
     delay(200);
+    printf("A\n");
 
     // select clock source to gyro
     if( !writeRegister(PWR_MGMNT_1,CLOCK_SEL_PLL) ){
         return -1;
     }
+
+    printf("B\n");
+
+    printf("C\n");
+
 
     // check the WHO AM I byte, expected value is 0x71 (decimal 113)
     if( whoAmI() != 113 ){
@@ -606,14 +617,8 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 
     /* write data to device */
     if( _useSPI ){
-        /*
-        SPI.beginTransaction(SPISettings(SPI_LS_CLOCK, MSBFIRST, SPI_MODE3)); // begin the transaction
-        digitalWriteFast(_csPin,LOW); // select the MPU9250 chip
-        SPI.transfer(subAddress); // write the register address
-        SPI.transfer(data); // write the data
-        digitalWriteFast(_csPin,HIGH); // deselect the MPU9250 chip
-        SPI.endTransaction(); // end the transaction
-        */
+        if (wiringPiSPIDataRW (0, &data, 1) < 1)
+            return -1;
     }
     else{
         wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
@@ -653,7 +658,6 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
     }
     else{
 
-        uint8_t i = 0; // read the data into the buffer
         for (uint8_t i=0; i<count; ++i) {
             dest[i] = wiringPiI2CReadReg8(_i2c_fd, subAddress+i);
         }
