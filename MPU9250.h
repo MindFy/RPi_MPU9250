@@ -31,10 +31,6 @@
 #ifndef MPU9250_h
 #define MPU9250_h
 
-// XXX
-#define i2c_pins int
-#define i2c_pullup int
-
 enum mpu9250_gyro_range
 {
     GYRO_RANGE_250DPS,
@@ -64,8 +60,8 @@ enum mpu9250_dlpf_bandwidth
 class MPU9250{
     public:
         MPU9250(uint8_t address, uint8_t bus);
-        MPU9250(uint8_t address, uint8_t bus, i2c_pins pins);
-        MPU9250(uint8_t address, uint8_t bus, i2c_pins pins, i2c_pullup pullups);
+        MPU9250(uint8_t address, uint8_t bus);
+        MPU9250(uint8_t address, uint8_t bus);
         MPU9250(uint8_t csPin);
         int begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange);
         int setFilt(mpu9250_dlpf_bandwidth bandwidth, uint8_t SRD);
@@ -89,8 +85,6 @@ class MPU9250{
     private:
         uint8_t _address;
         uint8_t _bus;
-        i2c_pins _pins;
-        i2c_pullup _pullups;
         bool _userDefI2C;
         uint8_t _csPin;
         bool _useSPI;
