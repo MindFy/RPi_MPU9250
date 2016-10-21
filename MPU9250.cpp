@@ -641,25 +641,13 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
 void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
     if( _useSPI ){
-        /*
-        // begin the transaction
-        if(_useSPIHS){
-            SPI.beginTransaction(SPISettings(SPI_HS_CLOCK, MSBFIRST, SPI_MODE3));
-        }
-        else{
-            SPI.beginTransaction(SPISettings(SPI_LS_CLOCK, MSBFIRST, SPI_MODE3));
-        }
-        digitalWriteFast(_csPin,LOW); // select the MPU9250 chip
-
-        SPI.transfer(subAddress | SPI_READ); // specify the starting register address
-
-        for(uint8_t i = 0; i < count; i++){
-            dest[i] = SPI.transfer(0x00); // read the data
+        uint8_t buff2[2];
+        for (uint8_t i=0; i<count; ++i) {
+            buff2[0] = subAddress;
+            wiringPiSPIDataRW(0, &buff2[0], 2);
+            dest[i] = buff2[1];
         }
 
-        digitalWriteFast(_csPin,HIGH); // deselect the MPU9250 chip
-        SPI.endTransaction(); // end the transaction
-        */
     }
     else{
 
