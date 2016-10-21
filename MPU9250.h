@@ -60,7 +60,7 @@ enum mpu9250_dlpf_bandwidth
 class MPU9250{
     public:
         MPU9250(uint8_t i2c_address);
-        MPU9250(void); // SPI
+        MPU9250(uint8_t bus, uint32_t speed); // SPI
         int begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange);
         int setFilt(mpu9250_dlpf_bandwidth bandwidth, uint8_t SRD);
         void getAccel(float* ax, float* ay, float* az);
@@ -83,9 +83,10 @@ class MPU9250{
     private:
         uint8_t _i2c_address;
         int8_t _i2c_fd;
+        uint8_t _spi_bus;
+        uint32_t _spi_speed;
         bool _userDefI2C;
         bool _useSPI;
-        bool _useSPIHS;
         float _accelScale;
         float _gyroScale;
         float _magScaleX, _magScaleY, _magScaleZ;

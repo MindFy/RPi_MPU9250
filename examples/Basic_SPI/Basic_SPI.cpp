@@ -3,8 +3,8 @@
 #include <wiringPi.h>
 
 
-// an MPU9250 object with the MPU-9250 sensor using SPI
-MPU9250 IMU;
+// an MPU9250 object with the MPU-9250 sensor using SPI bus 1, speed 400kHz
+MPU9250 IMU(1, 400000);
 
 float ax, ay, az, gx, gy, gz, hx, hy, hz, t;
 int beginStatus;

@@ -42,10 +42,11 @@ MPU9250::MPU9250(uint8_t i2c_address){
     _useSPI = false; // set to use I2C instead of SPI
 }
 
-/* MPU9250 object, input the SPI CS Pin */
-MPU9250::MPU9250(void){
+/* MPU9250 object, input the SPI bus and speed */
+MPU9250::MPU9250(uint8_t bus, uint32_t speed){
+    _spi_bus = bus;
+    _spi_speed = speed;
     _useSPI = true; // set to use SPI instead of I2C
-    _useSPIHS = false; // default to low speed SPI transactions until data reads start to occur
 }
 
 /* starts I2C communication and sets up the MPU-9250 */
@@ -56,7 +57,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     if( _useSPI ){ // using SPI for communication
 
         // begin the SPI
-        if (wiringPiSPISetup(1, 400000) < 0) 
+        if (wiringPiSPISetup(_spi_bus, _spi_speed) < 0) 
             return -1;
     }
     else{ // using I2C for communication
@@ -313,7 +314,6 @@ int MPU9250::setFilt(mpu9250_dlpf_bandwidth bandwidth, uint8_t SRD){
 void MPU9250::getAccelCounts(int16_t* ax, int16_t* ay, int16_t* az){
     uint8_t buff[6];
     int16_t axx, ayy, azz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(ACCEL_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -341,7 +341,6 @@ void MPU9250::getAccel(float* ax, float* ay, float* az){
 void MPU9250::getGyroCounts(int16_t* gx, int16_t* gy, int16_t* gz){
     uint8_t buff[6];
     int16_t gxx, gyy, gzz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(GYRO_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -368,7 +367,6 @@ void MPU9250::getGyro(float* gx, float* gy, float* gz){
 /* get magnetometer data given pointers to store the three values, return data as counts */
 void MPU9250::getMagCounts(int16_t* hx, int16_t* hy, int16_t* hz){
     uint8_t buff[7];
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     // read the magnetometer data off the external sensor buffer
     readRegisters(EXT_SENS_DATA_00,sizeof(buff),&buff[0]);
@@ -399,7 +397,6 @@ void MPU9250::getMag(float* hx, float* hy, float* hz){
 /* get temperature data given pointer to store the value, return data as counts */
 void MPU9250::getTempCounts(int16_t* t){
     uint8_t buff[2];
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(TEMP_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -419,7 +416,6 @@ void MPU9250::getTemp(float* t){
 void MPU9250::getMotion6Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz){
     uint8_t buff[14];
     int16_t axx, ayy, azz, gxx, gyy, gzz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(ACCEL_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -460,7 +456,6 @@ void MPU9250::getMotion6(float* ax, float* ay, float* az, float* gx, float* gy, 
 void MPU9250::getMotion7Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* t){
     uint8_t buff[14];
     int16_t axx, ayy, azz, gxx, gyy, gzz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(ACCEL_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -506,7 +501,6 @@ void MPU9250::getMotion7(float* ax, float* ay, float* az, float* gx, float* gy, 
 void MPU9250::getMotion9Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* hx, int16_t* hy, int16_t* hz){
     uint8_t buff[21];
     int16_t axx, ayy, azz, gxx, gyy, gzz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(ACCEL_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -556,7 +550,6 @@ void MPU9250::getMotion9(float* ax, float* ay, float* az, float* gx, float* gy, 
 void MPU9250::getMotion10Counts(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* hx, int16_t* hy, int16_t* hz, int16_t* t){
     uint8_t buff[21];
     int16_t axx, ayy, azz, gxx, gyy, gzz;
-    _useSPIHS = true; // use the high speed SPI for data readout
 
     readRegisters(ACCEL_OUT, sizeof(buff), &buff[0]); // grab the data from the MPU9250
 
@@ -614,7 +607,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
         uint8_t buff2[2];
         buff2[0] = subAddress;
         buff2[1] = data;
-        return wiringPiSPIDataRW(1, &buff2[0], 2) == 2;
+        return wiringPiSPIDataRW(_spi_bus, &buff2[0], 2) == 2;
     }
     
     wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
@@ -636,7 +629,7 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
         for (uint8_t i=0; i<count; ++i) {
             buff2[0] = subAddress | 0x80;
             buff2[1] = 0;
-            wiringPiSPIDataRW(1, &buff2[0], 2);
+            wiringPiSPIDataRW(_spi_bus, &buff2[0], 2);
             dest[i] = buff2[1];
         }
 
