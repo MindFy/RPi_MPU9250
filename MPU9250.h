@@ -84,7 +84,6 @@ class MPU9250{
         uint8_t _i2c_address;
         int8_t _i2c_fd;
         bool _userDefI2C;
-        uint8_t _csPin;
         bool _useSPI;
         bool _useSPIHS;
         float _accelScale;
