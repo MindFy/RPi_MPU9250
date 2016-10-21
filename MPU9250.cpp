@@ -687,9 +687,6 @@ uint8_t MPU9250::whoAmI(){
     // read the WHO AM I register
     readRegisters(WHO_AM_I,sizeof(buff),&buff[0]);
 
-    printf("%d\n", buff[0]);
-    exit(0);
-
     // return the register value
     return buff[0];
 }
