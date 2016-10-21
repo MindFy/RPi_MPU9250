@@ -81,7 +81,6 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
 
     printf("B\n");
 
-    printf("C\n");
 
 
     // check the WHO AM I byte, expected value is 0x71 (decimal 113)
@@ -89,6 +88,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
         return -1;
     }
 
+    printf("C\n");
     // enable accelerometer and gyro
     if( !writeRegister(PWR_MGMNT_2,SEN_ENABLE) ){
         return -1;
@@ -615,20 +615,16 @@ void MPU9250::getMotion10(float* ax, float* ay, float* az, float* gx, float* gy,
 bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
     uint8_t buff[1];
 
-    /* write data to device */
     if( _useSPI ){
         uint8_t buff2[2];
         buff2[0] = subAddress;
         buff2[1] = data;
-        if (wiringPiSPIDataRW (0, &buff2[0], 2) < 2)
-            return -1;
+        return wiringPiSPIDataRW (0, &buff2[0], 2) == 2;
     }
-    else{
-        wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
-    }
+    
+    wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
+   
     delay(10); // need to slow down how fast I write to MPU9250
-
-    printf("OKAY\n");
 
   	/* read back the register */
   	readRegisters(subAddress,sizeof(buff),&buff[0]);
