@@ -18,7 +18,9 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-all: libmpu9250.so 
+EXAMPLES = examples/Basic_I2C/Basic_I2C examples/Basic_SPI/Basic_SPI
+
+all: libmpu9250.so $(EXAMPLES)
 
 libmpu9250.so: MPU9250.o
 	g++ -O3 -shared -o libmpu9250.so MPU9250.o
@@ -30,5 +32,11 @@ install: libmpu9250.so
 	cp libmpu9250.so /usr/local/lib
 	cp MPU9250.h /usr/local/include
 
+examples/Basic_I2C/Basic_I2C: examples/Basic_I2C/Basic_I2C.cpp 
+	g++ -Wall -I ../.. -o examples/Basic_I2C/Basic_I2C examples/Basic_I2C/Basic_I2C.cpp -lmpu9250 -lwiringPi
+
+examples/Basic_SPI/Basic_SPI: examples/Basic_SPI/Basic_SPI.cpp 
+	g++ -Wall -I ../.. -o examples/Basic_SPI/Basic_SPI examples/Basic_SPI/Basic_SPI.cpp -lmpu9250 -lwiringPi
+
 clean:
-	rm -f *.o *.so *~ examples/Basic_I2C/BasicI2C examples/Basic_SPI/Basic_SPI
+	rm -f *.o *.so *~ $(EXAMPLES)
