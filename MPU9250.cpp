@@ -622,7 +622,7 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
     if( _useSPI ){
         uint8_t buff2[2];
         for (uint8_t i=0; i<count; ++i) {
-            buff2[0] = subAddress | 0x80;
+            buff2[0] = (subAddress+i) | 0x80;
             buff2[1] = 0;
             wiringPiSPIDataRW(_spi_bus, &buff2[0], 2);
             dest[i] = buff2[1];
