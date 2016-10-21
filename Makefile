@@ -21,10 +21,14 @@
 all: libmpu9250.so 
 
 libmpu9250.so: MPU9250.o
-	g++ -O3 -shared -o libmpu93250.so MPU9250.o
+	g++ -O3 -shared -o libmpu9250.so MPU9250.o
 
 MPU9250.o: MPU9250.cpp MPU9250.h
 	g++ -Wall -std=c++11 -c MPU9250.cpp
 
+install: libmpu9250.so
+	cp libmpu9250.so /usr/local/lib
+	cp MPU9250.h /usr/local/include
+
 clean:
-	rm -f *.o *.so *~
+	rm -f *.o *.so *~ examples/Basic_I2C/BasicI2C examples/Basic_SPI/Basic_SPI
