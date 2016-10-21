@@ -1,14 +1,9 @@
 /*
-   MPU9250.cpp : Implementation code for Raspberry Pi MPU9250 library
+   MPU9250.h : Header for Raspberry Pi MPU9250 library
 
-   Modified by Simon D. Levy from :
+   Copyright (c) Simon D. Levy 2016
 
-   MPU9250.cpp
-   Brian R Taylor
-   brian.taylor@bolderflight.com
-   2016-10-10
-
-   Copyright (c) 2016 Bolder Flight Systems
+   Adapted from https://github.com/bolderflight/MPU9250/blob/master/MPU9250.h
 
    Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
    and associated documentation files (the "Software"), to deal in the Software without restriction, 

@@ -1,5 +1,5 @@
 # 
-# Makefile for RPi_MPU9250 library
+# Makefile for MPU9250 SPI example
 #
 #
 # Copyright (c) 2016 Simon D. Levy
@@ -18,17 +18,12 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-all: libmpu9250.so $(EXAMPLES)
+ALL = Basic_SPI
 
-libmpu9250.so: MPU9250.o
-	g++ -shared -o libmpu9250.so MPU9250.o
+all: $(ALL)
 
-MPU9250.o: MPU9250.cpp MPU9250.h
-	g++ -Wall -fpic -std=c++11 -c MPU9250.cpp
-
-install: libmpu9250.so
-	cp libmpu9250.so /usr/lib
-	cp MPU9250.h /usr/local/include
+Basic_SPI: Basic_SPI.cpp 
+	g++ -std=c++11 -Wall -o Basic_SPI Basic_SPI.cpp -lwiringPi -lmpu9250 
 
 clean:
-	rm -f *.o *.so *~ 
+	rm -f $(ALL) *~

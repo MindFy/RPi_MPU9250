@@ -5,17 +5,19 @@ Adapted from Bolderflight's Teensy [implementation](https://github.com/bolderfli
 Quickstart:
 
 <pre>
-% make
-</pre>
-
-builds the examples.  
-
-<pre>
 % sudo make install
 </pre>
 
-builds the examples and installs <b>libmpu9250.so</b> in <tt>/usr/local/lib</tt> and
+builds and installs the library <b>libmpu9250.so</b> in <tt>/usr/lib</tt> and the header
 <b>libmpu9250.h</b> in <tt>/usr/local/include</tt>.
+
+<pre>
+% cd examples/Basic_I2C
+% make
+% ./Basic_I2C
+</pre>
+
+Runs the basic I^2C example.  Same procedure for the basic SPI example.
 
 
 
