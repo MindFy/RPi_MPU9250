@@ -33,6 +33,7 @@
 #include <wiringPiSPI.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* MPU9250 object, input the I2C address and I2C bus */
 MPU9250::MPU9250(uint8_t i2c_address){
@@ -55,7 +56,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     if( _useSPI ){ // using SPI for communication
 
         // begin the SPI
-        if (wiringPiSPISetup (0, 100000) < 0) 
+        if (wiringPiSPISetup(1, 400000) < 0) 
             return -1;
     }
     else{ // using I2C for communication
@@ -72,23 +73,17 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
 
     // wait for oscillators to stabilize
     delay(200);
-    printf("A\n");
 
     // select clock source to gyro
     if( !writeRegister(PWR_MGMNT_1,CLOCK_SEL_PLL) ){
         return -1;
     }
 
-    printf("B\n");
-
-
-
     // check the WHO AM I byte, expected value is 0x71 (decimal 113)
     if( whoAmI() != 113 ){
         return -1;
     }
 
-    printf("C\n");
     // enable accelerometer and gyro
     if( !writeRegister(PWR_MGMNT_2,SEN_ENABLE) ){
         return -1;
@@ -619,7 +614,7 @@ bool MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
         uint8_t buff2[2];
         buff2[0] = subAddress;
         buff2[1] = data;
-        return wiringPiSPIDataRW (0, &buff2[0], 2) == 2;
+        return wiringPiSPIDataRW(1, &buff2[0], 2) == 2;
     }
     
     wiringPiI2CWriteReg8(_i2c_fd, subAddress, data);
@@ -639,8 +634,9 @@ void MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
     if( _useSPI ){
         uint8_t buff2[2];
         for (uint8_t i=0; i<count; ++i) {
-            buff2[0] = subAddress;
-            wiringPiSPIDataRW(0, &buff2[0], 2);
+            buff2[0] = subAddress | 0x80;
+            buff2[1] = 0;
+            wiringPiSPIDataRW(1, &buff2[0], 2);
             dest[i] = buff2[1];
         }
 
@@ -690,6 +686,9 @@ uint8_t MPU9250::whoAmI(){
 
     // read the WHO AM I register
     readRegisters(WHO_AM_I,sizeof(buff),&buff[0]);
+
+    printf("%d\n", buff[0]);
+    exit(0);
 
     // return the register value
     return buff[0];
